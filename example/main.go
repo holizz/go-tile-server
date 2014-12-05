@@ -18,14 +18,9 @@ func main() {
 
 	http.Handle("/tiles/", tiles.NewTileHandler("/tiles"))
 
-	http.Handle("/public/", http.FileServer(http.Dir("public")))
-	http.HandleFunc("/", indexHandler)
+	http.Handle("/", http.FileServer(http.Dir("public")))
 
 	fmt.Printf("Listening on http://0.0.0.0:%d/\n", port)
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", port), nil))
-}
-
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hello"))
 }

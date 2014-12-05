@@ -2,6 +2,8 @@ package tiles
 
 import (
 	"fmt"
+	"image"
+	"image/png"
 	"net/http"
 	"strconv"
 	"strings"
@@ -47,6 +49,12 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	x := xyz_[1]
 	y := xyz_[2]
 
-	w.Write([]byte(fmt.Sprintf("serving image for %d, %d, %d", z, x, y)))
-	return
+	fmt.Println(x, y, z)
+
+	img := image.NewRGBA(image.Rect(0, 0, 256, 256))
+
+	err := png.Encode(w, img)
+	if err != nil {
+		panic(err)
+	}
 }

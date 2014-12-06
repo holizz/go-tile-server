@@ -108,21 +108,50 @@ func drawTile(lon, lat float64, font *truetype.Font) (image.Image, error) {
 		}
 	}
 
+	err := drawText(img, font, 256/2, 256/2, fmt.Sprintf("%f, %f", lon, lat))
+	if err != nil {
+		return nil, err
+	}
+
+	return img, nil
+}
+
+func drawText(img *image.RGBA, font *truetype.Font, x, y int, s string) error {
+	var ptSize float64 = 12
+
 	ctx := freetype.NewContext()
 	ctx.SetDPI(72)
 	ctx.SetFont(font)
-	ctx.SetFontSize(12)
+	ctx.SetFontSize(ptSize)
 	ctx.SetClip(img.Bounds())
 	ctx.SetDst(img)
 	ctx.SetSrc(image.Black)
 	ctx.SetHinting(freetype.FullHinting)
 
-	// pt := freetype.Pt(10, 10+int(c.PointToFix32(12)>>8))
-	pt := freetype.Pt(10, 20)
-	_, err := ctx.DrawString(fmt.Sprintf("%f, %f", lon, lat), pt)
+	width := int(widthOfString(font, ptSize, s))
+	pt := freetype.Pt(x-width/2, y+int(ctx.PointToFix32(ptSize)>>8)/2)
+	_, err := ctx.DrawString(s, pt)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	return img, nil
+	return nil
+}
+
+// https://code.google.com/p/plotinum/source/browse/vg/font.go#160
+func widthOfString(font *truetype.Font, size float64, s string) float64 {
+	// scale converts truetype.FUnit to float64
+	scale := size / float64(font.FUnitsPerEm())
+
+	width := 0
+	prev, hasPrev := truetype.Index(0), false
+	for _, rune := range s {
+		index := font.Index(rune)
+		if hasPrev {
+			width += int(font.Kerning(font.FUnitsPerEm(), prev, index))
+		}
+		width += int(font.HMetric(font.FUnitsPerEm(), index).AdvanceWidth)
+		prev, hasPrev = index, true
+	}
+	return float64(width) * scale
 }

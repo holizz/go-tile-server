@@ -13,8 +13,11 @@ type OsmData struct {
 }
 
 type Node struct {
-	Lon, Lat float64
+	Lon_, Lat_ float64
 }
+
+func (p Node) Lon() float64 { return p.Lon_ }
+func (p Node) Lat() float64 { return p.Lat_ }
 
 func parsePbf(path string) (*OsmData, error) {
 	f, err := os.Open(path)
@@ -39,10 +42,7 @@ func parsePbf(path string) (*OsmData, error) {
 		} else {
 			switch v := v.(type) {
 			case *osmpbf.Node:
-				data.Nodes = append(data.Nodes, Node{
-					Lon: v.Lon,
-					Lat: v.Lat,
-				})
+				data.Nodes = append(data.Nodes, Node{v.Lon, v.Lat})
 			case *osmpbf.Way:
 				// Ignore
 			case *osmpbf.Relation:

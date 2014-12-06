@@ -13,17 +13,16 @@ import (
 
 const tileSize = 256
 
-func drawTile(lonWest, latNorth, lonEast, latSouth, scale float64, font *truetype.Font, data *OsmData, debug bool) (image.Image, error) {
+func drawTile(nwPt, sePt Pointer, scale float64, font *truetype.Font, data *OsmData, debug bool) (image.Image, error) {
 	// Create white image
 	img := image.NewRGBA(image.Rect(0, 0, tileSize, tileSize))
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
 
 	// Plot some nodes
 	for _, node := range data.Nodes {
-		if node.Lon > lonWest && node.Lon < lonEast &&
-			node.Lat < latNorth && node.Lat > latSouth {
-			x, y := getRelativeXY(lonWest, latNorth, node.Lon, node.Lat, scale)
-			// fmt.Println(x, y)
+		if node.Lon() > nwPt.Lon() && node.Lon() < sePt.Lon() &&
+			node.Lat() < nwPt.Lat() && node.Lat() > sePt.Lat() {
+			x, y := getRelativeXY(nwPt, node, scale)
 			img.Set(round(x), round(y), image.Black)
 		}
 	}
@@ -39,7 +38,7 @@ func drawTile(lonWest, latNorth, lonEast, latSouth, scale float64, font *truetyp
 		}
 
 		// Tile location
-		err := drawText(img, font, red, tileSize/2, 20, fmt.Sprintf("%f, %f", lonWest, latNorth))
+		err := drawText(img, font, red, tileSize/2, 20, fmt.Sprintf("%f, %f", nwPt.Lon(), nwPt.Lat()))
 		if err != nil {
 			return nil, err
 		}

@@ -83,10 +83,10 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	x := xyz_[1]
 	y := xyz_[2]
 
-	lonWest, latNorth := getLonLatFromTileName(x, y, zoom)
-	lonEast, latSouth := getLonLatFromTileName(x+1, y+1, zoom)
+	nwPt := getLonLatFromTileName(x, y, zoom)
+	sePt := getLonLatFromTileName(x+1, y+1, zoom)
 
-	img, err := drawTile(lonWest, latNorth, lonEast, latSouth, float64(zoom), th.font, th.data, debug)
+	img, err := drawTile(nwPt, sePt, float64(zoom), th.font, th.data, debug)
 	if err != nil {
 		panic(err)
 	}

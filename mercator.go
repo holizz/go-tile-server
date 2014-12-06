@@ -17,7 +17,7 @@ func getLonLatFromTileName(x, y, zoom int64) (float64, float64) {
 
 func getXY(lon, lat, zoom float64) (float64, float64) {
 	scale := math.Pow(2, zoom)
-	x := ((lon + 180) / 360) * scale * 256
+	x := ((lon + 180) / 360) * scale * tileSize
 	y := (180 / math.Pi * math.Log(math.Tan(math.Pi/4+lat*(math.Pi/180)/2))) * scale
 
 	return x, y
@@ -29,11 +29,11 @@ func getRelativeXY(lonWest, latNorth, lon, lat, scale float64) (float64, float64
 	x := nodeX - baseX
 	y := baseY - nodeY
 
-	if x < 0 || x >= 256 {
+	if x < 0 || x >= tileSize {
 		fmt.Printf("Error in X: %f %f\n", x, y)
 	}
 
-	if y < 0 || y >= 256 {
+	if y < 0 || y >= tileSize {
 		fmt.Printf("Error in Y: %f %f\n", x, y)
 	}
 

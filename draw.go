@@ -10,30 +10,32 @@ import (
 	"code.google.com/p/freetype-go/freetype/truetype"
 )
 
+const tileSize = 256
+
 func drawTile(lonWest, latNorth, lonEast, latSouth, scale float64, font *truetype.Font, data *OsmData) (image.Image, error) {
 	// Create white image
-	img := image.NewRGBA(image.Rect(0, 0, 256, 256))
+	img := image.NewRGBA(image.Rect(0, 0, tileSize, tileSize))
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
 
 	// Top/left border
-	for i := 0; i < 256; i++ {
+	for i := 0; i < tileSize; i++ {
 		img.Set(0, i, image.Black)
 		img.Set(i, 0, image.Black)
 	}
 
 	// Dots
-	for i := 0; i < 256; i += 16 {
-		for j := 0; j < 256; j += 16 {
+	for i := 0; i < tileSize; i += 16 {
+		for j := 0; j < tileSize; j += 16 {
 			img.Set(i, j, image.Black)
 		}
 	}
 
 	// Tile location
-	err := drawText(img, font, 256/2, 20, fmt.Sprintf("%f, %f", lonWest, latNorth))
+	err := drawText(img, font, tileSize/2, 20, fmt.Sprintf("%f, %f", lonWest, latNorth))
 	if err != nil {
 		return nil, err
 	}
-	err = drawText(img, font, 256/2, 256-20, fmt.Sprintf("%f, %f", lonEast, latSouth))
+	err = drawText(img, font, tileSize/2, tileSize-20, fmt.Sprintf("%f, %f", lonEast, latSouth))
 	if err != nil {
 		return nil, err
 	}

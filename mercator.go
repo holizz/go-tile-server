@@ -30,7 +30,7 @@ func getLonLatFromTileName(x, y, zoom int64) Point {
 func getXY(pt Pointer, zoom float64) (float64, float64) {
 	scale := math.Pow(2, zoom)
 	x := ((pt.Lon() + 180) / 360) * scale * tileSize
-	y := (180 / math.Pi * math.Log(math.Tan(math.Pi/4+pt.Lat()*(math.Pi/180)/2))) * scale
+	y := (180 / math.Pi * math.Log(math.Tan(math.Pi/4+pt.Lat()*(math.Pi/180)/2))) * scale / 1.5
 
 	return x, y
 }

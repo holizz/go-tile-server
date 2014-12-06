@@ -20,8 +20,8 @@ func getXY(lon, lat, zoom float64) (float64, float64) {
 	return x, y
 }
 
-func getRelativeXY(lonEast, latNorth, lon, lat, scale float64) (float64, float64) {
-	baseX, baseY := getXY(lonEast, latNorth, scale)
+func getRelativeXY(lonWest, latNorth, lon, lat, scale float64) (float64, float64) {
+	baseX, baseY := getXY(lonWest, latNorth, scale)
 	nodeX, nodeY := getXY(lon, lat, scale)
 
 	return nodeX - baseX, baseY - nodeY

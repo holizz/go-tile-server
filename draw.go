@@ -10,7 +10,7 @@ import (
 	"code.google.com/p/freetype-go/freetype/truetype"
 )
 
-func drawTile(lonEast, latNorth, lonWest, latSouth, scale float64, font *truetype.Font, data *OsmData) (image.Image, error) {
+func drawTile(lonWest, latNorth, lonEast, latSouth, scale float64, font *truetype.Font, data *OsmData) (image.Image, error) {
 	// Create white image
 	img := image.NewRGBA(image.Rect(0, 0, 256, 256))
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
@@ -29,20 +29,20 @@ func drawTile(lonEast, latNorth, lonWest, latSouth, scale float64, font *truetyp
 	}
 
 	// Tile location
-	err := drawText(img, font, 256/2, 20, fmt.Sprintf("%f, %f", lonEast, latNorth))
+	err := drawText(img, font, 256/2, 20, fmt.Sprintf("%f, %f", lonWest, latNorth))
 	if err != nil {
 		return nil, err
 	}
-	err = drawText(img, font, 256/2, 256-20, fmt.Sprintf("%f, %f", lonWest, latSouth))
+	err = drawText(img, font, 256/2, 256-20, fmt.Sprintf("%f, %f", lonEast, latSouth))
 	if err != nil {
 		return nil, err
 	}
 
 	// Plot some nodes
 	for _, node := range data.Nodes {
-		if node.Lon > lonEast && node.Lon < lonWest &&
+		if node.Lon > lonWest && node.Lon < lonEast &&
 			node.Lat < latNorth && node.Lat > latSouth {
-			x, y := getRelativeXY(lonEast, latNorth, node.Lon, node.Lat, scale)
+			x, y := getRelativeXY(lonWest, latNorth, node.Lon, node.Lat, scale)
 			fmt.Println(x, y)
 			img.Set(round(x), round(y), image.Black)
 		}

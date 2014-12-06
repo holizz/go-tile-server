@@ -19,4 +19,4 @@ You will need these things installed:
 
 To rebuild the protobuf .go files:
 
-    % go generate
+    % cd osmpbf && go generate

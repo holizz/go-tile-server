@@ -1,4 +1,6 @@
-package tiles
+package OSMPBF
+
+//go:generate protoc --go_out=. fileformat.proto osmformat.proto
 
 import (
 	"fmt"
@@ -6,20 +8,9 @@ import (
 	"os"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/holizz/go-tile-server/osmpbf"
 )
 
 type Pbf struct {
-	Ways []Way
-}
-
-type Way struct {
-	Nodes []Node
-}
-
-type Node struct {
-	Lon float64
-	Lat float64
 }
 
 func NewPbf(pbfPath string) *Pbf {
@@ -32,7 +23,7 @@ func NewPbf(pbfPath string) *Pbf {
 
 	size := readInt4(f)
 
-	blobHeader := &OSMPBF.BlobHeader{}
+	blobHeader := &BlobHeader{}
 
 	pbfData := make([]byte, size)
 	_, err = f.Read(pbfData)

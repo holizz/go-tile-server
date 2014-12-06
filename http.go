@@ -1,7 +1,5 @@
 package tiles
 
-//go:generate protoc --go_out=. osmpbf/fileformat.proto osmpbf/osmformat.proto
-
 import (
 	"fmt"
 	"image"
@@ -13,6 +11,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"github.com/holizz/go-tile-server/osmpbf"
 
 	"code.google.com/p/freetype-go/freetype"
 	"code.google.com/p/freetype-go/freetype/truetype"
@@ -25,8 +24,8 @@ type TileHandler struct {
 
 // prefix should be of the form "/tiles" (without the trailing slash)
 func NewTileHandler(prefix, pbfPath, fontPath string) *TileHandler {
-	// pbf := NewPbf(pbfPath)
-	NewPbf(pbfPath)
+	pbf := OSMPBF.NewPbf(pbfPath)
+	fmt.Println(pbf)
 
 	os.Exit(1)
 

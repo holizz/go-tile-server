@@ -11,19 +11,12 @@ import (
 )
 
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Println("Please specify a PBF file")
-		os.Exit(1)
-	}
-
-	pbfFile := os.Args[1]
-
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
 		port = 3000
 	}
 
-	tileHandler := tiles.NewTileHandler("/tiles", pbfFile, "FiraSans-Regular.ttf")
+	tileHandler := tiles.NewTileHandler("/tiles", "isle-of-man-latest.osm.pbf", "FiraSans-Regular.ttf")
 
 	http.Handle("/tiles/", tileHandler)
 	http.Handle("/", http.FileServer(http.Dir("public")))

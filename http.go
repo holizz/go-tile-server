@@ -1,5 +1,7 @@
 package tiles
 
+//go:generate protoc --go_out=. osmpbf/fileformat.proto osmpbf/osmformat.proto
+
 import (
 	"fmt"
 	"image"
@@ -8,6 +10,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
@@ -21,7 +24,12 @@ type TileHandler struct {
 }
 
 // prefix should be of the form "/tiles" (without the trailing slash)
-func NewTileHandler(prefix, fontPath string) *TileHandler {
+func NewTileHandler(prefix, pbfPath, fontPath string) *TileHandler {
+	// pbf := NewPbf(pbfPath)
+	NewPbf(pbfPath)
+
+	os.Exit(1)
+
 	font_, err := ioutil.ReadFile(fontPath)
 	if err != nil {
 		panic(err)

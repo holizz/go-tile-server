@@ -16,6 +16,7 @@ type TileHandler struct {
 	prefix string
 	font   *truetype.Font
 	data   *OsmData
+	debug  bool
 }
 
 // prefix should be of the form "/tiles" (without the trailing slash)
@@ -45,6 +46,7 @@ func NewTileHandler(prefix, pbfPath, fontPath string) *TileHandler {
 		prefix: prefix,
 		font:   font,
 		data:   osmData,
+		debug:  true,
 	}
 }
 
@@ -80,7 +82,7 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	lonWest, latNorth := getLonLatFromTileName(x, y, zoom)
 	lonEast, latSouth := getLonLatFromTileName(x+1, y+1, zoom)
 
-	img, err := drawTile(lonWest, latNorth, lonEast, latSouth, float64(zoom), th.font, th.data)
+	img, err := drawTile(lonWest, latNorth, lonEast, latSouth, float64(zoom), th.font, th.data, th.debug)
 	if err != nil {
 		panic(err)
 	}

@@ -3,6 +3,7 @@ package tiles
 import (
 	"fmt"
 	"image"
+	"image/color"
 	"image/draw"
 	"math"
 
@@ -12,33 +13,10 @@ import (
 
 const tileSize = 256
 
-func drawTile(lonWest, latNorth, lonEast, latSouth, scale float64, font *truetype.Font, data *OsmData) (image.Image, error) {
+func drawTile(lonWest, latNorth, lonEast, latSouth, scale float64, font *truetype.Font, data *OsmData, debug bool) (image.Image, error) {
 	// Create white image
 	img := image.NewRGBA(image.Rect(0, 0, tileSize, tileSize))
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
-
-	// Top/left border
-	for i := 0; i < tileSize; i++ {
-		img.Set(0, i, image.Black)
-		img.Set(i, 0, image.Black)
-	}
-
-	// Dots
-	for i := 0; i < tileSize; i += 16 {
-		for j := 0; j < tileSize; j += 16 {
-			img.Set(i, j, image.Black)
-		}
-	}
-
-	// Tile location
-	err := drawText(img, font, tileSize/2, 20, fmt.Sprintf("%f, %f", lonWest, latNorth))
-	if err != nil {
-		return nil, err
-	}
-	err = drawText(img, font, tileSize/2, tileSize-20, fmt.Sprintf("%f, %f", lonEast, latSouth))
-	if err != nil {
-		return nil, err
-	}
 
 	// Plot some nodes
 	for _, node := range data.Nodes {
@@ -50,10 +28,37 @@ func drawTile(lonWest, latNorth, lonEast, latSouth, scale float64, font *truetyp
 		}
 	}
 
+	// Debugging
+	if debug {
+		red := color.RGBA{0xff, 0x00, 0x00, 0xff}
+
+		// Top/left border
+		for i := 0; i < tileSize; i++ {
+			img.Set(0, i, red)
+			img.Set(i, 0, red)
+		}
+
+		// Dots
+		for i := 0; i < tileSize; i++ {
+			for j := 0; j < tileSize; j++ {
+				// Top/left border + dots
+				if i == 0 || j == 0 || (i%16 == 0 && j%16 == 0) {
+					img.Set(i, j, red)
+				}
+			}
+		}
+
+		// Tile location
+		err := drawText(img, font, red, tileSize/2, 20, fmt.Sprintf("%f, %f", lonWest, latNorth))
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return img, nil
 }
 
-func drawText(img *image.RGBA, font *truetype.Font, x, y int, s string) error {
+func drawText(img *image.RGBA, font *truetype.Font, color color.Color, x, y int, s string) error {
 	var ptSize float64 = 12
 
 	ctx := freetype.NewContext()
@@ -62,7 +67,7 @@ func drawText(img *image.RGBA, font *truetype.Font, x, y int, s string) error {
 	ctx.SetFontSize(ptSize)
 	ctx.SetClip(img.Bounds())
 	ctx.SetDst(img)
-	ctx.SetSrc(image.Black)
+	ctx.SetSrc(image.NewUniform(color))
 	ctx.SetHinting(freetype.FullHinting)
 
 	width := int(widthOfString(font, ptSize, s))

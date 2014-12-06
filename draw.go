@@ -38,16 +38,6 @@ func drawTile(lonWest, latNorth, lonEast, latSouth, scale float64, font *truetyp
 			img.Set(i, 0, red)
 		}
 
-		// Dots
-		for i := 0; i < tileSize; i++ {
-			for j := 0; j < tileSize; j++ {
-				// Top/left border + dots
-				if i == 0 || j == 0 || (i%16 == 0 && j%16 == 0) {
-					img.Set(i, j, red)
-				}
-			}
-		}
-
 		// Tile location
 		err := drawText(img, font, red, tileSize/2, 20, fmt.Sprintf("%f, %f", lonWest, latNorth))
 		if err != nil {

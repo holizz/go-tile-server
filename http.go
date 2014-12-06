@@ -16,7 +16,6 @@ type TileHandler struct {
 	prefix string
 	font   *truetype.Font
 	data   *OsmData
-	debug  bool
 }
 
 // prefix should be of the form "/tiles" (without the trailing slash)
@@ -46,12 +45,17 @@ func NewTileHandler(prefix, pbfPath, fontPath string) *TileHandler {
 		prefix: prefix,
 		font:   font,
 		data:   osmData,
-		debug:  true,
 	}
 }
 
 func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path[len(th.prefix):]
+
+	debug := false
+	debug_ := r.URL.Query()["debug"]
+	if len(debug_) == 1 && debug_[0] == "1" {
+		debug = true
+	}
 
 	if !(strings.HasPrefix(path, "/") && strings.HasSuffix(path, ".png")) {
 		w.Write([]byte("404"))
@@ -82,7 +86,7 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	lonWest, latNorth := getLonLatFromTileName(x, y, zoom)
 	lonEast, latSouth := getLonLatFromTileName(x+1, y+1, zoom)
 
-	img, err := drawTile(lonWest, latNorth, lonEast, latSouth, float64(zoom), th.font, th.data, th.debug)
+	img, err := drawTile(lonWest, latNorth, lonEast, latSouth, float64(zoom), th.font, th.data, debug)
 	if err != nil {
 		panic(err)
 	}

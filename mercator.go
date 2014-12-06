@@ -1,6 +1,9 @@
 package tiles
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
 func getLonLatFromTileName(x, y, zoom int64) (float64, float64) {
@@ -14,7 +17,7 @@ func getLonLatFromTileName(x, y, zoom int64) (float64, float64) {
 
 func getXY(lon, lat, zoom float64) (float64, float64) {
 	scale := math.Pow(2, zoom)
-	x := (lon + 180) * scale
+	x := ((lon + 180) / 360) * scale * 256
 	y := (180 / math.Pi * math.Log(math.Tan(math.Pi/4+lat*(math.Pi/180)/2))) * scale
 
 	return x, y
@@ -23,6 +26,17 @@ func getXY(lon, lat, zoom float64) (float64, float64) {
 func getRelativeXY(lonWest, latNorth, lon, lat, scale float64) (float64, float64) {
 	baseX, baseY := getXY(lonWest, latNorth, scale)
 	nodeX, nodeY := getXY(lon, lat, scale)
+	x := nodeX - baseX
+	y := baseY - nodeY
 
-	return nodeX - baseX, baseY - nodeY
+	if x < 0 || x >= 256 {
+		fmt.Printf("Error in X: %f %f\n", x, y)
+	}
+
+	if y < 0 || y >= 256 {
+		fmt.Printf("Error in Y: %f %f\n", x, y)
+	}
+
+	// fmt.Printf("XY: %f %f\n", x, y)
+	return x, y
 }

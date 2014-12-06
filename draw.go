@@ -43,7 +43,7 @@ func drawTile(lonWest, latNorth, lonEast, latSouth, scale float64, font *truetyp
 		if node.Lon > lonWest && node.Lon < lonEast &&
 			node.Lat < latNorth && node.Lat > latSouth {
 			x, y := getRelativeXY(lonWest, latNorth, node.Lon, node.Lat, scale)
-			fmt.Println(x, y)
+			// fmt.Println(x, y)
 			img.Set(round(x), round(y), image.Black)
 		}
 	}

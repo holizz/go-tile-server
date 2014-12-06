@@ -6,6 +6,7 @@ import (
 	"image/color"
 	"image/draw"
 	"math"
+	"time"
 
 	"code.google.com/p/freetype-go/freetype"
 	"code.google.com/p/freetype-go/freetype/truetype"
@@ -14,6 +15,8 @@ import (
 const tileSize = 256
 
 func drawTile(nwPt, sePt Pointer, scale float64, font *truetype.Font, data *OsmData, debug bool) (image.Image, error) {
+	t := time.Now()
+
 	// Create white image
 	img := image.NewRGBA(image.Rect(0, 0, tileSize, tileSize))
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
@@ -39,6 +42,12 @@ func drawTile(nwPt, sePt Pointer, scale float64, font *truetype.Font, data *OsmD
 
 		// Tile location
 		err := drawText(img, font, red, tileSize/2, 20, fmt.Sprintf("%f, %f", nwPt.Lon(), nwPt.Lat()))
+		if err != nil {
+			return nil, err
+		}
+
+		// Tile location
+		err = drawText(img, font, red, tileSize/2, tileSize-20, time.Since(t).String())
 		if err != nil {
 			return nil, err
 		}

@@ -84,6 +84,17 @@ func drawTile(lon, lat float64, fontPath string) (image.Image, error) {
 	img := image.NewRGBA(image.Rect(0, 0, 256, 256))
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
 
+	for i := 0; i < 256; i++ {
+		img.Set(0, i, image.Black)
+		img.Set(i, 0, image.Black)
+	}
+
+	for i := 0; i < 256; i += 16 {
+		for j := 0; j < 256; j += 16 {
+			img.Set(i, j, image.Black)
+		}
+	}
+
 	font_, err := ioutil.ReadFile(fontPath)
 	if err != nil {
 		panic(err)

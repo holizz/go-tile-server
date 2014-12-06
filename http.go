@@ -12,15 +12,26 @@ import (
 	"strings"
 
 	"code.google.com/p/freetype-go/freetype"
+	"code.google.com/p/freetype-go/freetype/truetype"
 )
 
 type TileHandler struct {
 	prefix string
-	font   string
+	font   *truetype.Font
 }
 
 // prefix should be of the form "/tiles" (without the trailing slash)
-func NewTileHandler(prefix, font string) *TileHandler {
+func NewTileHandler(prefix, fontPath string) *TileHandler {
+	font_, err := ioutil.ReadFile(fontPath)
+	if err != nil {
+		panic(err)
+	}
+
+	font, err := freetype.ParseFont(font_)
+	if err != nil {
+		panic(err)
+	}
+
 	return &TileHandler{
 		prefix: prefix,
 		font:   font,
@@ -79,30 +90,22 @@ func getLonLat(x, y, zoom int64) (float64, float64) {
 	return lon, lat
 }
 
-func drawTile(lon, lat float64, fontPath string) (image.Image, error) {
+func drawTile(lon, lat float64, font *truetype.Font) (image.Image, error) {
 	// Create white image
 	img := image.NewRGBA(image.Rect(0, 0, 256, 256))
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
 
+	// Top/left border
 	for i := 0; i < 256; i++ {
 		img.Set(0, i, image.Black)
 		img.Set(i, 0, image.Black)
 	}
 
+	// Dots
 	for i := 0; i < 256; i += 16 {
 		for j := 0; j < 256; j += 16 {
 			img.Set(i, j, image.Black)
 		}
-	}
-
-	font_, err := ioutil.ReadFile(fontPath)
-	if err != nil {
-		panic(err)
-	}
-
-	font, err := freetype.ParseFont(font_)
-	if err != nil {
-		panic(err)
 	}
 
 	ctx := freetype.NewContext()
@@ -116,7 +119,7 @@ func drawTile(lon, lat float64, fontPath string) (image.Image, error) {
 
 	// pt := freetype.Pt(10, 10+int(c.PointToFix32(12)>>8))
 	pt := freetype.Pt(10, 20)
-	_, err = ctx.DrawString(fmt.Sprintf("%f, %f", lon, lat), pt)
+	_, err := ctx.DrawString(fmt.Sprintf("%f, %f", lon, lat), pt)
 	if err != nil {
 		panic(err)
 	}

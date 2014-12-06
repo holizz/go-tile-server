@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image"
 	"image/png"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -34,7 +35,7 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	xyz_ := []uint64{}
+	xyz_ := []int64{}
 	for _, value := range xyz {
 		intVal, err := strconv.Atoi(value)
 		if err != nil {
@@ -42,14 +43,14 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		xyz_ = append(xyz_, uint64(intVal))
+		xyz_ = append(xyz_, int64(intVal))
 	}
 
-	z := xyz_[0]
+	zoom := xyz_[0]
 	x := xyz_[1]
 	y := xyz_[2]
 
-	fmt.Println(x, y, z)
+	fmt.Println(getLonLat(x, y, zoom))
 
 	img := image.NewRGBA(image.Rect(0, 0, 256, 256))
 
@@ -57,4 +58,14 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+// https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_numbers_to_lon..2Flat.
+func getLonLat(x, y, zoom int64) (float64, float64) {
+	n := math.Pow(2, float64(zoom))
+	lon := (float64(x) / n * 360) - 180
+	latRad := math.Atan(math.Sinh(math.Pi * (1 - (2 * float64(y) / n))))
+	lat := latRad * 180 / math.Pi
+
+	return lon, lat
 }

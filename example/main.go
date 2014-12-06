@@ -16,7 +16,9 @@ func main() {
 		port = 3000
 	}
 
-	http.Handle("/tiles/", tiles.NewTileHandler("/tiles"))
+	tileHandler := tiles.NewTileHandler("/tiles", "FiraSans-Regular.ttf")
+
+	http.Handle("/tiles/", tileHandler)
 
 	http.Handle("/", http.FileServer(http.Dir("public")))
 

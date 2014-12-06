@@ -3,21 +3,27 @@ package tiles
 import (
 	"fmt"
 	"image"
+	"image/draw"
 	"image/png"
+	"io/ioutil"
 	"math"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"code.google.com/p/freetype-go/freetype"
 )
 
 type TileHandler struct {
 	prefix string
+	font   string
 }
 
 // prefix should be of the form "/tiles" (without the trailing slash)
-func NewTileHandler(prefix string) *TileHandler {
+func NewTileHandler(prefix, font string) *TileHandler {
 	return &TileHandler{
 		prefix: prefix,
+		font:   font,
 	}
 }
 
@@ -50,11 +56,14 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	x := xyz_[1]
 	y := xyz_[2]
 
-	fmt.Println(getLonLat(x, y, zoom))
+	lon, lat := getLonLat(x, y, zoom)
 
-	img := image.NewRGBA(image.Rect(0, 0, 256, 256))
+	img, err := drawTile(lon, lat, th.font)
+	if err != nil {
+		panic(err)
+	}
 
-	err := png.Encode(w, img)
+	err = png.Encode(w, img)
 	if err != nil {
 		panic(err)
 	}
@@ -68,4 +77,38 @@ func getLonLat(x, y, zoom int64) (float64, float64) {
 	lat := latRad * 180 / math.Pi
 
 	return lon, lat
+}
+
+func drawTile(lon, lat float64, fontPath string) (image.Image, error) {
+	// Create white image
+	img := image.NewRGBA(image.Rect(0, 0, 256, 256))
+	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
+
+	font_, err := ioutil.ReadFile(fontPath)
+	if err != nil {
+		panic(err)
+	}
+
+	font, err := freetype.ParseFont(font_)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx := freetype.NewContext()
+	ctx.SetDPI(72)
+	ctx.SetFont(font)
+	ctx.SetFontSize(12)
+	ctx.SetClip(img.Bounds())
+	ctx.SetDst(img)
+	ctx.SetSrc(image.Black)
+	ctx.SetHinting(freetype.FullHinting)
+
+	// pt := freetype.Pt(10, 10+int(c.PointToFix32(12)>>8))
+	pt := freetype.Pt(10, 20)
+	_, err = ctx.DrawString(fmt.Sprintf("%f, %f", lon, lat), pt)
+	if err != nil {
+		panic(err)
+	}
+
+	return img, nil
 }

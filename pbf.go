@@ -86,15 +86,6 @@ func (w Way) GetNodes(nodes map[int64]Node) []Node {
 	return newNodes
 }
 
-func (w Way) GetNodePairs(nodes map[int64]Node) [][]Node {
-	pairs := [][]Node{}
-	nodeList := w.GetNodes(nodes)
-	for i := 0; i < len(nodeList)-1; i++ {
-		pairs = append(pairs, []Node{nodeList[i], nodeList[i+1]})
-	}
-	return pairs
-}
-
 func ParsePbf(path string) (*OsmData, error) {
 	f, err := os.Open(path)
 	if err != nil {

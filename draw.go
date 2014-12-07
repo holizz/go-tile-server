@@ -47,12 +47,14 @@ func DrawTile(nwPt, sePt Pointer, zoom int64, font *truetype.Font, data *OsmData
 					continue
 				}
 
-				for _, pair := range way.GetNodePairs(data.Nodes) {
-					x1, y1 := getRelativeXY(nwPt, pair[0], float64(zoom))
-					x2, y2 := getRelativeXY(nwPt, pair[1], float64(zoom))
-
-					drawLine(img, color.Black, x1, y1, x2, y2)
+				coords := [][]float64{}
+				for _, node := range way.GetNodes(data.Nodes) {
+					x, y := getRelativeXY(nwPt, node, float64(zoom))
+					coords = append(coords, []float64{x, y})
 				}
+
+				drawPolyLine(img, color.Black, coords)
+
 			case ItemTypeRelation:
 				//TODO
 			}
@@ -131,19 +133,17 @@ func round(n float64) int {
 	return int(math.Floor(n))
 }
 
-func drawLine(img *image.RGBA, color color.Color, x1, y1, x2, y2 float64) {
-	path := draw2d.NewPathStorage().MoveTo(x1, y1).LineTo(x2, y2)
+func drawPolyLine(img *image.RGBA, color color.Color, coords [][]float64) {
+	path := draw2d.NewPathStorage()
+	for i, coord := range coords {
+		if i == 0 {
+			path.MoveTo(coord[0], coord[1])
+		} else {
+			path.LineTo(coord[0], coord[1])
+		}
+	}
+
 	gc := draw2d.NewGraphicContext(img)
 	gc.SetStrokeColor(color)
 	gc.Stroke(path)
-
-	slope := (y1 - y2) / (x1 - x2)
-	yInt := slope*x1 - y1
-
-	for x := 0; x < tileSize; x++ {
-		if (float64(x) < x1 || float64(x) < x2) &&
-			(float64(x) > x1 || float64(x) > x2) {
-			img.Set(x, round(float64(x)*slope+yInt), color)
-		}
-	}
 }

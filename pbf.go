@@ -8,9 +8,23 @@ import (
 	"github.com/qedus/osmpbf"
 )
 
+type ItemType int
+
+const (
+	ItemTypeNode = iota
+	ItemTypeWay
+	ItemTypeRelation
+)
+
 type OsmData struct {
-	Nodes map[int64]Node
-	Ways  []Way
+	Nodes    map[int64]Node
+	Ways     map[int64]Way
+	Features map[string][]FeatureRef
+}
+
+type FeatureRef struct {
+	Id   int64
+	Type ItemType
 }
 
 type Node struct {
@@ -31,6 +45,37 @@ func NodeFromPbf(n *osmpbf.Node) Node {
 
 type Way struct {
 	NodeIDs []int64
+	Id      int64
+	Tags    map[string]string
+}
+
+func WayFromPbf(w *osmpbf.Way) Way {
+	return Way{
+		NodeIDs: w.NodeIDs,
+		Id:      w.ID,
+		//TODO: strip tags which don't appear in mapFeatures
+		Tags: w.Tags,
+	}
+}
+
+func (w Way) Match(feature Feature) bool {
+	for key, val := range w.Tags {
+		for _, tag := range feature.Tags {
+			if key == tag.Key && val == tag.Val {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (w Way) MatchAny(features map[string]Feature) (string, bool) {
+	for name, feature := range features {
+		if w.Match(feature) {
+			return name, true
+		}
+	}
+	return "", false
 }
 
 func (w Way) GetNodes(nodes map[int64]Node) []Node {
@@ -64,7 +109,9 @@ func ParsePbf(path string) (*OsmData, error) {
 	}
 
 	data := &OsmData{
-		Nodes: map[int64]Node{},
+		Nodes:    map[int64]Node{},
+		Ways:     map[int64]Way{},
+		Features: map[string][]FeatureRef{},
 	}
 
 	for {
@@ -78,8 +125,11 @@ func ParsePbf(path string) (*OsmData, error) {
 				node := NodeFromPbf(v)
 				data.Nodes[node.Id] = node
 			case *osmpbf.Way:
-				if _, ok := v.Tags["highway"]; ok {
-					data.Ways = append(data.Ways, Way{v.NodeIDs})
+				way := WayFromPbf(v)
+				fName, ok := way.MatchAny(mapFeatures)
+				if ok {
+					data.Ways[way.Id] = way
+					data.Features[fName] = append(data.Features[fName], FeatureRef{way.Id, ItemTypeWay})
 				}
 			case *osmpbf.Relation:
 				// Ignore

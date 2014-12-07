@@ -8,6 +8,7 @@ import (
 	"math"
 	"time"
 
+	"code.google.com/p/draw2d/draw2d"
 	"code.google.com/p/freetype-go/freetype"
 	"code.google.com/p/freetype-go/freetype/truetype"
 )
@@ -21,12 +22,26 @@ func drawTile(nwPt, sePt Pointer, scale float64, font *truetype.Font, data *OsmD
 	img := image.NewRGBA(image.Rect(0, 0, tileSize, tileSize))
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
 
-	// Plot some nodes
-	for _, node := range data.Nodes {
-		if node.Lon() > nwPt.Lon() && node.Lon() < sePt.Lon() &&
-			node.Lat() < nwPt.Lat() && node.Lat() > sePt.Lat() {
-			x, y := getRelativeXY(nwPt, node, scale)
-			img.Set(round(x), round(y), image.Black)
+	// Plot some ways
+	for _, way := range data.Ways {
+		//TODO: this ignores ways crossing over the tile
+		withinBounds := false
+		for _, node := range way.GetNodes(data.Nodes) {
+			if node.Lon() > nwPt.Lon() && node.Lon() < sePt.Lon() &&
+				node.Lat() < nwPt.Lat() && node.Lat() > sePt.Lat() {
+				withinBounds = true
+			}
+		}
+
+		if !withinBounds {
+			continue
+		}
+
+		for _, pair := range way.GetNodePairs(data.Nodes) {
+			x1, y1 := getRelativeXY(nwPt, pair[0], scale)
+			x2, y2 := getRelativeXY(nwPt, pair[1], scale)
+
+			drawLine(img, color.Black, x1, y1, x2, y2)
 		}
 	}
 
@@ -100,4 +115,21 @@ func widthOfString(font *truetype.Font, size float64, s string) float64 {
 func round(n float64) int {
 	//TODO: this is incorrect
 	return int(math.Floor(n))
+}
+
+func drawLine(img *image.RGBA, color color.Color, x1, y1, x2, y2 float64) {
+	path := draw2d.NewPathStorage().MoveTo(x1, y1).LineTo(x2, y2)
+	gc := draw2d.NewGraphicContext(img)
+	gc.SetStrokeColor(color)
+	gc.Stroke(path)
+
+	slope := (y1 - y2) / (x1 - x2)
+	yInt := slope*x1 - y1
+
+	for x := 0; x < tileSize; x++ {
+		if (float64(x) < x1 || float64(x) < x2) &&
+			(float64(x) > x1 || float64(x) > x2) {
+			img.Set(x, round(float64(x)*slope+yInt), color)
+		}
+	}
 }

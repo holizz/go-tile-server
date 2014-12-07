@@ -1,9 +1,6 @@
 package tiles
 
-import (
-	"fmt"
-	"math"
-)
+import "math"
 
 type Pointer interface {
 	Lon() float64
@@ -40,14 +37,6 @@ func getRelativeXY(nwPt, nodePt Pointer, scale float64) (float64, float64) {
 	nodeX, nodeY := getXY(nodePt, scale)
 	x := nodeX - baseX
 	y := nodeY - baseY
-
-	if x < 0 || x >= tileSize {
-		fmt.Printf("Error in X: %f %f\n", x, y)
-	}
-
-	if y < 0 || y >= tileSize {
-		fmt.Printf("Error in Y: %f %f\n", x, y)
-	}
 
 	return x, y
 }

@@ -1,7 +1,7 @@
 package tiles
 
 type Feature struct {
-	MinZoom int
+	MinZoom int64
 	Tags    []Tag
 }
 

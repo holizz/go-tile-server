@@ -15,33 +15,47 @@ import (
 
 const tileSize = 256
 
-func DrawTile(nwPt, sePt Pointer, scale float64, font *truetype.Font, data *OsmData, debug bool) (image.Image, error) {
+func DrawTile(nwPt, sePt Pointer, zoom int64, font *truetype.Font, data *OsmData, debug bool) (image.Image, error) {
 	t := time.Now()
 
 	// Create white image
 	img := image.NewRGBA(image.Rect(0, 0, tileSize, tileSize))
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
 
-	// Plot some ways
-	for _, way := range data.Ways {
-		//TODO: this ignores ways crossing over the tile
-		withinBounds := false
-		for _, node := range way.GetNodes(data.Nodes) {
-			if node.Lon() > nwPt.Lon() && node.Lon() < sePt.Lon() &&
-				node.Lat() < nwPt.Lat() && node.Lat() > sePt.Lat() {
-				withinBounds = true
-			}
-		}
-
-		if !withinBounds {
+	// Plot some features
+	for fName, features := range data.Features {
+		if mapFeatures[fName].MinZoom > zoom {
 			continue
 		}
 
-		for _, pair := range way.GetNodePairs(data.Nodes) {
-			x1, y1 := getRelativeXY(nwPt, pair[0], scale)
-			x2, y2 := getRelativeXY(nwPt, pair[1], scale)
+		for _, feature := range features {
+			switch feature.Type {
+			case ItemTypeNode:
+				//TODO
+			case ItemTypeWay:
+				way := data.Ways[feature.Id]
+				//TODO: this ignores ways crossing over the tile
+				withinBounds := false
+				for _, node := range way.GetNodes(data.Nodes) {
+					if node.Lon() > nwPt.Lon() && node.Lon() < sePt.Lon() &&
+						node.Lat() < nwPt.Lat() && node.Lat() > sePt.Lat() {
+						withinBounds = true
+					}
+				}
 
-			drawLine(img, color.Black, x1, y1, x2, y2)
+				if !withinBounds {
+					continue
+				}
+
+				for _, pair := range way.GetNodePairs(data.Nodes) {
+					x1, y1 := getRelativeXY(nwPt, pair[0], float64(zoom))
+					x2, y2 := getRelativeXY(nwPt, pair[1], float64(zoom))
+
+					drawLine(img, color.Black, x1, y1, x2, y2)
+				}
+			case ItemTypeRelation:
+				//TODO
+			}
 		}
 	}
 

@@ -86,7 +86,7 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	nwPt := getLonLatFromTileName(x, y, zoom)
 	sePt := getLonLatFromTileName(x+1, y+1, zoom)
 
-	img, err := DrawTile(nwPt, sePt, float64(zoom), th.font, th.data, debug)
+	img, err := DrawTile(nwPt, sePt, zoom, th.font, th.data, debug)
 	if err != nil {
 		panic(err)
 	}

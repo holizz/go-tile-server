@@ -53,15 +53,14 @@ func WayFromPbf(w *osmpbf.Way) Way {
 	return Way{
 		NodeIDs: w.NodeIDs,
 		Id:      w.ID,
-		//TODO: strip tags which don't appear in mapFeatures
-		Tags: w.Tags,
+		Tags:    w.Tags,
 	}
 }
 
 func (w Way) Match(feature Feature) bool {
 	for key, val := range w.Tags {
 		for _, tag := range feature.Tags {
-			if key == tag.Key && val == tag.Val {
+			if key == tag.Key && (val == tag.Val || tag.Val == "*") {
 				return true
 			}
 		}

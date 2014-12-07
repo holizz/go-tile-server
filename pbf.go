@@ -9,7 +9,7 @@ import (
 )
 
 type OsmData struct {
-	Nodes []Node
+	Nodes map[int64]Node
 	Ways  []Way
 }
 
@@ -33,20 +33,15 @@ type Way struct {
 	NodeIDs []int64
 }
 
-func (w Way) GetNodes(nodes []Node) []Node {
+func (w Way) GetNodes(nodes map[int64]Node) []Node {
 	newNodes := []Node{}
-	for _, node := range nodes {
-		for _, id := range w.NodeIDs {
-			if node.Id == id {
-				newNodes = append(newNodes, node)
-			}
-			continue
-		}
+	for _, id := range w.NodeIDs {
+		newNodes = append(newNodes, nodes[id])
 	}
 	return newNodes
 }
 
-func (w Way) GetNodePairs(nodes []Node) [][]Node {
+func (w Way) GetNodePairs(nodes map[int64]Node) [][]Node {
 	pairs := [][]Node{}
 	nodeList := w.GetNodes(nodes)
 	for i := 0; i < len(nodeList)-1; i++ {
@@ -68,7 +63,9 @@ func ParsePbf(path string) (*OsmData, error) {
 		return nil, err
 	}
 
-	data := &OsmData{}
+	data := &OsmData{
+		Nodes: map[int64]Node{},
+	}
 
 	for {
 		if v, err := d.Decode(); err == io.EOF {
@@ -78,7 +75,8 @@ func ParsePbf(path string) (*OsmData, error) {
 		} else {
 			switch v := v.(type) {
 			case *osmpbf.Node:
-				data.Nodes = append(data.Nodes, NodeFromPbf(v))
+				node := NodeFromPbf(v)
+				data.Nodes[node.Id] = node
 			case *osmpbf.Way:
 				if _, ok := v.Tags["highway"]; ok {
 					data.Ways = append(data.Ways, Way{v.NodeIDs})

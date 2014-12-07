@@ -35,7 +35,7 @@ func NewTileHandler(prefix, pbfPath, fontPath string) *TileHandler {
 
 	// Read PBF
 	log.Println("Parsing PBF file...")
-	osmData, err := parsePbf(pbfPath)
+	osmData, err := ParsePbf(pbfPath)
 	if err != nil {
 		panic(err)
 	}
@@ -86,7 +86,7 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	nwPt := getLonLatFromTileName(x, y, zoom)
 	sePt := getLonLatFromTileName(x+1, y+1, zoom)
 
-	img, err := drawTile(nwPt, sePt, float64(zoom), th.font, th.data, debug)
+	img, err := DrawTile(nwPt, sePt, float64(zoom), th.font, th.data, debug)
 	if err != nil {
 		panic(err)
 	}

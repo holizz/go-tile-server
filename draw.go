@@ -15,7 +15,7 @@ import (
 
 const tileSize = 256
 
-func drawTile(nwPt, sePt Pointer, scale float64, font *truetype.Font, data *OsmData, debug bool) (image.Image, error) {
+func DrawTile(nwPt, sePt Pointer, scale float64, font *truetype.Font, data *OsmData, debug bool) (image.Image, error) {
 	t := time.Now()
 
 	// Create white image

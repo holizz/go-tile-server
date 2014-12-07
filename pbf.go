@@ -55,7 +55,7 @@ func (w Way) GetNodePairs(nodes []Node) [][]Node {
 	return pairs
 }
 
-func parsePbf(path string) (*OsmData, error) {
+func ParsePbf(path string) (*OsmData, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err

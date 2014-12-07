@@ -24,7 +24,7 @@ func BenchmarkDrawTile(b *testing.B) {
 	}
 
 	// Read PBF file
-	data, err := parsePbf("example/isle-of-man-latest.osm.pbf")
+	data, err := ParsePbf("example/isle-of-man-latest.osm.pbf")
 	if err != nil {
 		b.Fatalf("Benchmark setup failed: %#v\n", err)
 	}
@@ -32,7 +32,7 @@ func BenchmarkDrawTile(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
-		_, err := drawTile(nwPt, sePt, scale, font, data, false)
+		_, err := DrawTile(nwPt, sePt, scale, font, data, false)
 		if err != nil {
 			b.Fatalf("Received error: %#v\n", err)
 		}

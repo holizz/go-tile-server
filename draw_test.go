@@ -10,7 +10,7 @@ import (
 func BenchmarkDrawTile(b *testing.B) {
 	nwPt := Point{-4.482421875, 54.162433968067795}
 	sePt := Point{-4.471435546875, 54.156001090284924}
-	scale := float64(15)
+	scale := int64(15)
 
 	// Read font
 	font_, err := ioutil.ReadFile("example/FiraSans-Regular.ttf")

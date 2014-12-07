@@ -91,8 +91,6 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	err = png.Encode(w, img)
-	if err != nil {
-		panic(err)
-	}
+	// Ignore broken pipe errors
+	png.Encode(w, img)
 }

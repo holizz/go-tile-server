@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"code.google.com/p/freetype-go/freetype"
+	"github.com/golang/freetype"
 )
 
 func BenchmarkDrawTile(b *testing.B) {

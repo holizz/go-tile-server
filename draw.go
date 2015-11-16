@@ -8,9 +8,12 @@ import (
 	"math"
 	"time"
 
-	"code.google.com/p/draw2d/draw2d"
-	"code.google.com/p/freetype-go/freetype"
-	"code.google.com/p/freetype-go/freetype/truetype"
+	"github.com/golang/freetype"
+	"github.com/golang/freetype/truetype"
+	"github.com/llgcode/draw2d"
+	"github.com/llgcode/draw2d/draw2dimg"
+	img_font "golang.org/x/image/font"
+	"golang.org/x/image/math/fixed"
 )
 
 const tileSize = 256
@@ -97,10 +100,10 @@ func drawText(img *image.RGBA, font *truetype.Font, color color.Color, x, y int,
 	ctx.SetClip(img.Bounds())
 	ctx.SetDst(img)
 	ctx.SetSrc(image.NewUniform(color))
-	ctx.SetHinting(freetype.FullHinting)
+	ctx.SetHinting(img_font.HintingFull)
 
 	width := int(widthOfString(font, ptSize, s))
-	pt := freetype.Pt(x-width/2, y+int(ctx.PointToFix32(ptSize)>>8)/2)
+	pt := freetype.Pt(x-width/2, y+int(int32(ctx.PointToFixed(ptSize))>>8)/2)
 	_, err := ctx.DrawString(s, pt)
 	if err != nil {
 		return err
@@ -119,9 +122,9 @@ func widthOfString(font *truetype.Font, size float64, s string) float64 {
 	for _, rune := range s {
 		index := font.Index(rune)
 		if hasPrev {
-			width += int(font.Kerning(font.FUnitsPerEm(), prev, index))
+			width += int(font.Kern(fixed.Int26_6(font.FUnitsPerEm()), prev, index))
 		}
-		width += int(font.HMetric(font.FUnitsPerEm(), index).AdvanceWidth)
+		width += int(font.HMetric(fixed.Int26_6(font.FUnitsPerEm()), index).AdvanceWidth)
 		prev, hasPrev = index, true
 	}
 
@@ -134,7 +137,7 @@ func round(n float64) int {
 }
 
 func drawPolyLine(img *image.RGBA, color color.Color, coords [][]float64) {
-	path := draw2d.NewPathStorage()
+	path := new(draw2d.Path)
 	for i, coord := range coords {
 		if i == 0 {
 			path.MoveTo(coord[0], coord[1])
@@ -143,7 +146,7 @@ func drawPolyLine(img *image.RGBA, color color.Color, coords [][]float64) {
 		}
 	}
 
-	gc := draw2d.NewGraphicContext(img)
+	gc := draw2dimg.NewGraphicContext(img)
 	gc.SetStrokeColor(color)
 	gc.Stroke(path)
 }

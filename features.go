@@ -16,6 +16,12 @@ var mapFeatures = map[string]Feature{
 			{"natural", "coastline"},
 		},
 	},
+	"borders": {
+		MinZoom: 0,
+		Tags: []Tag{
+			{"admin_level", "2"},
+		},
+	},
 	"all-other-roads": {
 		MinZoom: 14,
 		Tags: []Tag{

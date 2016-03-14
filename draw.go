@@ -5,17 +5,14 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
-	"math"
 	"time"
 
-	"code.google.com/p/draw2d/draw2d"
-	"code.google.com/p/freetype-go/freetype"
-	"code.google.com/p/freetype-go/freetype/truetype"
+	"github.com/llgcode/draw2d/draw2dimg"
 )
 
 const tileSize = 256
 
-func DrawTile(nwPt, sePt Pointer, zoom int64, font *truetype.Font, data *OsmData, debug bool) (image.Image, error) {
+func DrawTile(nwPt, sePt Pointer, zoom int64, data *OsmData, debug bool) (image.Image, error) {
 	t := time.Now()
 
 	// Create white image
@@ -72,13 +69,13 @@ func DrawTile(nwPt, sePt Pointer, zoom int64, font *truetype.Font, data *OsmData
 		}
 
 		// Tile location
-		err := drawText(img, font, red, tileSize/2, 20, fmt.Sprintf("%f, %f", nwPt.Lon(), nwPt.Lat()))
+		err := drawText(img, red, tileSize/2, 20, fmt.Sprintf("%f, %f", nwPt.Lon(), nwPt.Lat()))
 		if err != nil {
 			return nil, err
 		}
 
 		// Tile location
-		err = drawText(img, font, red, tileSize/2, tileSize-20, time.Since(t).String())
+		err = drawText(img, red, tileSize/2, tileSize-20, time.Since(t).String())
 		if err != nil {
 			return nil, err
 		}
@@ -87,54 +84,23 @@ func DrawTile(nwPt, sePt Pointer, zoom int64, font *truetype.Font, data *OsmData
 	return img, nil
 }
 
-func drawText(img *image.RGBA, font *truetype.Font, color color.Color, x, y int, s string) error {
-	var ptSize float64 = 12
+func drawText(img *image.RGBA, cc color.Color, x, y int, s string) error {
 
-	ctx := freetype.NewContext()
-	ctx.SetDPI(72)
-	ctx.SetFont(font)
-	ctx.SetFontSize(ptSize)
-	ctx.SetClip(img.Bounds())
-	ctx.SetDst(img)
-	ctx.SetSrc(image.NewUniform(color))
-	ctx.SetHinting(freetype.FullHinting)
-
-	width := int(widthOfString(font, ptSize, s))
-	pt := freetype.Pt(x-width/2, y+int(ctx.PointToFix32(ptSize)>>8)/2)
-	_, err := ctx.DrawString(s, pt)
-	if err != nil {
-		return err
-	}
+	path := draw2dimg.NewGraphicContext(img)
+	path.SetStrokeColor(cc)
+	path.SetFillColor(cc)
+	path.SetDPI(72)
+	path.StrokeStringAt(s, float64(x), float64(y))
 
 	return nil
 }
 
-// https://code.google.com/p/plotinum/source/browse/vg/font.go#160
-func widthOfString(font *truetype.Font, size float64, s string) float64 {
-	// scale converts truetype.FUnit to float64
-	scale := size / float64(font.FUnitsPerEm())
+func drawPolyLine(img *image.RGBA, cc color.Color, coords [][]float64) {
+	path := draw2dimg.NewGraphicContext(img)
 
-	width := 0
-	prev, hasPrev := truetype.Index(0), false
-	for _, rune := range s {
-		index := font.Index(rune)
-		if hasPrev {
-			width += int(font.Kerning(font.FUnitsPerEm(), prev, index))
-		}
-		width += int(font.HMetric(font.FUnitsPerEm(), index).AdvanceWidth)
-		prev, hasPrev = index, true
-	}
+	path.SetStrokeColor(cc)
+	path.SetLineWidth(1)
 
-	return float64(width) * scale
-}
-
-func round(n float64) int {
-	//TODO: this is incorrect
-	return int(math.Floor(n))
-}
-
-func drawPolyLine(img *image.RGBA, color color.Color, coords [][]float64) {
-	path := draw2d.NewPathStorage()
 	for i, coord := range coords {
 		if i == 0 {
 			path.MoveTo(coord[0], coord[1])
@@ -143,7 +109,6 @@ func drawPolyLine(img *image.RGBA, color color.Color, coords [][]float64) {
 		}
 	}
 
-	gc := draw2d.NewGraphicContext(img)
-	gc.SetStrokeColor(color)
-	gc.Stroke(path)
+	path.Close()
+	path.Stroke()
 }

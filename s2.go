@@ -22,6 +22,12 @@ func (si S2Index) AddWay(w Way, fname string, data *OsmData) {
 	cu := rc.FastCovering(c)
 	for _, cid := range cu {
 		si[cid] = append(si[cid], FeatureRef{w.Id, ItemTypeWay, fname})
+		for l := cid.Level(); l > 0; l-- {
+			cid = cid.Parent(l - 1)
+			if _, ok := si[cid]; !ok {
+				si[cid] = make([]FeatureRef, 0)
+			}
+		}
 	}
 }
 

@@ -20,41 +20,45 @@ func DrawTile(nwPt, sePt Pointer, zoom int64, data *OsmData, debug bool) (image.
 	draw.Draw(img, img.Bounds(), image.White, image.ZP, draw.Src)
 
 	// Plot some features
-	for fName, features := range data.Features {
-		if mapFeatures[fName].MinZoom > zoom {
+	//for fName, features := range data.Features {
+	for _, feature := range data.Findex.GetFeatures(nwPt, sePt, zoom, data) {
+		if mz, ok := mapFeatures[feature.FName]; ok {
+			if mz.MinZoom > zoom {
+				continue
+			}
+		} else {
 			continue
 		}
 
-		for _, feature := range features {
-			switch feature.Type {
-			case ItemTypeNode:
-				//TODO
-			case ItemTypeWay:
-				way := data.Ways[feature.Id]
-				//TODO: this ignores ways crossing over the tile
-				withinBounds := false
-				for _, node := range way.GetNodes(data.Nodes) {
-					if node.Lon() > nwPt.Lon() && node.Lon() < sePt.Lon() &&
-						node.Lat() < nwPt.Lat() && node.Lat() > sePt.Lat() {
-						withinBounds = true
-					}
+		switch feature.Type {
+		case ItemTypeNode:
+			//TODO
+		case ItemTypeWay:
+			way := data.Ways[feature.Id]
+			//TODO: this ignores ways crossing over the tile
+			withinBounds := false
+			for _, node := range way.GetNodes(data.Nodes) {
+				if node.Lon() > nwPt.Lon() && node.Lon() < sePt.Lon() &&
+					node.Lat() < nwPt.Lat() && node.Lat() > sePt.Lat() {
+					withinBounds = true
+					break
 				}
-
-				if !withinBounds {
-					continue
-				}
-
-				coords := [][]float64{}
-				for _, node := range way.GetNodes(data.Nodes) {
-					x, y := getRelativeXY(nwPt, node, float64(zoom))
-					coords = append(coords, []float64{x, y})
-				}
-
-				drawPolyLine(img, color.Black, coords)
-
-			case ItemTypeRelation:
-				//TODO
 			}
+
+			if !withinBounds {
+				continue
+			}
+
+			coords := [][]float64{}
+			for _, node := range way.GetNodes(data.Nodes) {
+				x, y := getRelativeXY(nwPt, node, float64(zoom))
+				coords = append(coords, []float64{x, y})
+			}
+
+			drawPolyLine(img, color.Black, coords)
+
+		case ItemTypeRelation:
+			//TODO
 		}
 	}
 

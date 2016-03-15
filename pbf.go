@@ -17,14 +17,15 @@ const (
 )
 
 type OsmData struct {
-	Nodes    map[int64]Node
-	Ways     map[int64]Way
-	Features map[string][]FeatureRef
+	Nodes  map[int64]Node
+	Ways   map[int64]Way
+	Findex S2Index
 }
 
 type FeatureRef struct {
-	Id   int64
-	Type ItemType
+	Id    int64
+	Type  ItemType
+	FName string
 }
 
 type Node struct {
@@ -99,9 +100,9 @@ func ParsePbf(path string) (*OsmData, error) {
 	}
 
 	data := &OsmData{
-		Nodes:    map[int64]Node{},
-		Ways:     map[int64]Way{},
-		Features: map[string][]FeatureRef{},
+		Nodes:  map[int64]Node{},
+		Ways:   map[int64]Way{},
+		Findex: make(S2Index),
 	}
 
 	for {
@@ -119,7 +120,7 @@ func ParsePbf(path string) (*OsmData, error) {
 				fName, ok := way.MatchAny(mapFeatures)
 				if ok {
 					data.Ways[way.Id] = way
-					data.Features[fName] = append(data.Features[fName], FeatureRef{way.Id, ItemTypeWay})
+					data.Findex.AddWay(way, fName, data)
 				}
 			case *osmpbf.Relation:
 				// Ignore

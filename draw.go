@@ -21,7 +21,7 @@ func DrawTile(nwPt, sePt Pointer, zoom int64, data *OsmData, debug bool) (image.
 
 	// Plot some features
 	//for fName, features := range data.Features {
-	for _, feature := range data.Findex.GetFeatures(nwPt, sePt, zoom, data) {
+	for _, feature := range data.Findex.GetFeatures(nwPt, sePt, zoom) {
 		if mz, ok := mapFeatures[feature.FName]; ok {
 			if mz.MinZoom > zoom {
 				continue

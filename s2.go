@@ -31,7 +31,7 @@ func (si S2Index) AddWay(w Way, fname string, data *OsmData) {
 	}
 }
 
-func (si S2Index) GetFeatures(nwPt, sePt Pointer, zoom int64, data *OsmData) []FeatureRef {
+func (si S2Index) GetFeatures(nwPt, sePt Pointer, zoom int64) []FeatureRef {
 
 	r := s2.RectFromLatLng(s2.LatLngFromDegrees(nwPt.Lat(), nwPt.Lon()))
 	r = r.AddPoint(s2.LatLngFromDegrees(sePt.Lat(), sePt.Lon()))
@@ -48,10 +48,11 @@ func (si S2Index) GetFeatures(nwPt, sePt Pointer, zoom int64, data *OsmData) []F
 		if v, ok := si[cid]; ok {
 			ret = si.VisitDown(cid, v, visitF, ret)
 
-			for l := cid.Level(); l > 0; l-- {
-				cid = cid.Parent(l - 1)
-				ret = si.VisitUp(cid, visitCid, visitF, ret)
-			}
+		}
+		for l := cid.Level(); l > 0; l-- {
+			cid = cid.Parent(l - 1)
+			ret = si.VisitUp(cid, visitCid, visitF, ret)
+
 		}
 	}
 	//fmt.Println( len(ret))
@@ -59,12 +60,16 @@ func (si S2Index) GetFeatures(nwPt, sePt Pointer, zoom int64, data *OsmData) []F
 }
 
 func (si S2Index) VisitUp(cid s2.CellID, visitCid map[s2.CellID]bool, visitF map[int64]bool, ret []FeatureRef) []FeatureRef {
+	v, ok := si[cid]
+	if !ok {
+		return ret
+	}
 	if visitCid[cid] {
 		return ret
 	}
 	visitCid[cid] = true
 
-	for _, f := range si[cid] {
+	for _, f := range v {
 		if !visitF[f.Id] {
 			ret = append(ret, f)
 			visitF[f.Id] = true

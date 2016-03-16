@@ -3,6 +3,7 @@ package tiles
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 
 	"github.com/qedus/osmpbf"
@@ -130,5 +131,8 @@ func ParsePbf(path string) (*OsmData, error) {
 		}
 	}
 
+	log.Println("Num s2Cells", len(data.Findex))
+	log.Println("Num ways", len(data.Ways))
+	log.Println("Num nodes", len(data.Nodes))
 	return data, nil
 }

@@ -16,14 +16,56 @@ var mapFeatures = map[string]Feature{
 			{"natural", "coastline"},
 		},
 	},
-	"borders": {
+	"borders2": {
 		MinZoom: 0,
 		Tags: []Tag{
 			{"admin_level", "2"},
 		},
 	},
-	"all-other-roads": {
+	"borders3": {
+		MinZoom: 6,
+		Tags: []Tag{
+			{"admin_level", "3"},
+		},
+	},
+	"borders4": {
+		MinZoom: 8,
+		Tags: []Tag{
+			{"admin_level", "4"},
+		},
+	},
+	"borders5": {
+		MinZoom: 10,
+		Tags: []Tag{
+			{"admin_level", "5"},
+		},
+	},
+	"borders6": {
+		MinZoom: 12,
+		Tags: []Tag{
+			{"admin_level", "6"},
+		},
+	},
+	"borders7": {
+		MinZoom: 12,
+		Tags: []Tag{
+			{"admin_level", "7"},
+		},
+	},
+	"borders8": {
+		MinZoom: 13,
+		Tags: []Tag{
+			{"admin_level", "8"},
+		},
+	},
+	"borders9": {
 		MinZoom: 14,
+		Tags: []Tag{
+			{"admin_level", "9"},
+		},
+	},
+	"all-other-roads": {
+		MinZoom: 12,
 		Tags: []Tag{
 			{"highway", "unclassified"},
 			{"highway", "residential"},
@@ -41,7 +83,7 @@ var mapFeatures = map[string]Feature{
 		},
 	},
 	"major-ish-roads": {
-		MinZoom: 12,
+		MinZoom: 9,
 		Tags: []Tag{
 			{"highway", "primary"},
 			{"highway", "secondary"},
@@ -49,7 +91,7 @@ var mapFeatures = map[string]Feature{
 		},
 	},
 	"major-major-roads": {
-		MinZoom: 10,
+		MinZoom: 6,
 		Tags: []Tag{
 			{"highway", "motorway"},
 			{"highway", "trunk"},

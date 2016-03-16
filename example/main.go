@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/holizz/go-tile-server"
+	"github.com/llgcode/draw2d"
 )
 
 func main() {
@@ -16,7 +17,8 @@ func main() {
 		port = 3000
 	}
 
-	tileHandler := tiles.NewTileHandler("/tiles", "isle-of-man-latest.osm.pbf", "FiraSans-Regular.ttf")
+	draw2d.SetFontFolder(".")
+	tileHandler := tiles.NewTileHandler("/tiles", "isle-of-man-latest.osm.pbf")
 
 	http.Handle("/tiles/", tileHandler)
 	http.Handle("/", http.FileServer(http.Dir("public")))

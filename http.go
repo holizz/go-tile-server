@@ -2,37 +2,19 @@ package tiles
 
 import (
 	"image/png"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"code.google.com/p/freetype-go/freetype"
-	"code.google.com/p/freetype-go/freetype/truetype"
 )
 
 type TileHandler struct {
 	prefix string
-	font   *truetype.Font
 	data   *OsmData
 }
 
 // prefix should be of the form "/tiles" (without the trailing slash)
-func NewTileHandler(prefix, pbfPath, fontPath string) *TileHandler {
-	// Read font
-	log.Println("Parsing font file...")
-	font_, err := ioutil.ReadFile(fontPath)
-	if err != nil {
-		panic(err)
-	}
-
-	font, err := freetype.ParseFont(font_)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("Parsing font file... [DONE]")
-
+func NewTileHandler(prefix, pbfPath string) *TileHandler {
 	// Read PBF
 	log.Println("Parsing PBF file...")
 	osmData, err := ParsePbf(pbfPath)
@@ -43,7 +25,6 @@ func NewTileHandler(prefix, pbfPath, fontPath string) *TileHandler {
 
 	return &TileHandler{
 		prefix: prefix,
-		font:   font,
 		data:   osmData,
 	}
 }
@@ -86,7 +67,7 @@ func (th *TileHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	nwPt := getLonLatFromTileName(x, y, zoom)
 	sePt := getLonLatFromTileName(x+1, y+1, zoom)
 
-	img, err := DrawTile(nwPt, sePt, zoom, th.font, th.data, debug)
+	img, err := DrawTile(nwPt, sePt, zoom, th.data, debug)
 	if err != nil {
 		panic(err)
 	}

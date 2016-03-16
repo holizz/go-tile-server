@@ -113,6 +113,5 @@ func drawPolyLine(img *image.RGBA, cc color.Color, coords [][]float64) {
 		}
 	}
 
-	path.Close()
 	path.Stroke()
 }
